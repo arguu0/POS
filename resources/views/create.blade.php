@@ -7,15 +7,19 @@
     <title>Document</title>
 </head>
 <body>
+    <form method='POST' action="/products/create_category">
+    @csrf
+        <input type="text" name="cat_name"><button type="submit">Add a new Category</button><br><br>
+    </form>
     <form method="POST" action="/products/create">
     @csrf
         <label for="category">Choose the Category:</label>
         <select name="category" id="category">
-            <option value="drinks">Drinks</option>
-            <option value="snacks" selected>Snacks</option>
-        </select>
-        <input type="text"><button>Add a new Category</button><br><br>
-
+            @foreach ($cat as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @endforeach
+        </select><br><br>
+    
         <label>product name:</label>
         <input type="text" name="name"><br><br>
         <label>product price:</label>

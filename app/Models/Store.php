@@ -18,4 +18,11 @@ class Store extends Model
     {
         return $this->hasMany(ProductDatabase::class, 'store_id');
     }
+    public function categories()
+    {
+        return $this->hasMany(Categories::class, 'store_id');
+    }
+    public function transactions() {
+        return $this->hasMany(transactions::class);
+    }
 }

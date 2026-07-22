@@ -12,16 +12,17 @@
     @method('PUT')
         <label for="category">Choose the Category:</label>
         <select name="category" id="category">
-            <option value="drinks">Drinks</option>
-            <option value="snacks" selected>Snacks</option>
-        </select>
-        <input type="text"><button>Add a new Category</button><br><br>
-
+            @foreach ($cat as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @endforeach
+                <option value="{{ $sel_cat_id }}" selected>{{ $sel_cat_name }}</option>
+        </select><br><br>
+    
         <label>product name:</label>
-        <input type="text" name="name"><br><br>
+        <input type="text" name="name" value="{{ $user }}"><br><br>
         <label>product price:</label>
-        <input type="number" name="price"><br><br>
-        <button type="submit">Update Product</button>
+        <input type="number" name="price" value="{{ $price }}"><br><br>
+        <button type="submit">Save Product</button>
     </form>
 </body>
 </html>
