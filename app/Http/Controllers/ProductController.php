@@ -8,72 +8,49 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
+    /** 
+     * Display Product Page
      */
-    public function index(Request $request)
+    public function get_product_page(Request $request)
     {
         $products = $request->user()->store->products;
-        return view('products', [ 'products' => $products ]); 
+        $categories = $request->user()->store->categories;
+        return view('products', [ 'products' => $products, 'category'=> $categories ]); 
     }
+
 
     /**
-     * Show the form for creating a new resource.
+     * Create New Category / If Exist, Create New Product
      */
-    public function create(Request $request)
+    public function create_new_product(Request $request)
     {
-        $cat = $request->user()->store->categories;
-        return view('create', [ 'cat'=>$cat ]);
-    }
-
-    public function create_cat(Request $request)
-    {
-        $category = $request->input('cat_name');
-        $request->user()->store->categories()->create([
-            'name' => $category
-        ]);
-        return redirect('/products/create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $product_name = $request->input('name');
+        $name = $request->input('name');
         $price = $request->input('price');
         $category_id = $request->input('category');
+        $new_category = $request->input('new_category');
+        $stock = $request->input('stock');
 
-        $request->user()->store->products()->create([
-            'name' => $product_name,
-            'price' => $price,
-            'category_id' => $category_id
-        ]);
-        return redirect('products');
+        if ($new_category) {
+            $new_cat = $request->user()->store->categories()->create([
+                'name' => $new_category
+            ]);
+            $request->user()->store->products()->create([
+                'name' => $name,
+                'price' => $price,
+                'category_id' => $new_cat->id,
+                'stock' => $stock
+            ]);
+        } else {
+            $request->user()->store->products()->create([
+                'name' => $name,
+                'price' => $price,
+                'category_id' => $category_id,
+                'stock' => $stock
+            ]);
+        }
+        return redirect(route('products'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Request $request, string $id)
-    {
-        $product_detail = $request->user()->store->products->findOrFail($id);
-
-        return view('update', ['user'=> $product_detail->name, 
-                                'price'=> $product_detail->price, 
-                                'cat'=>$request->user()->store->categories->except($product_detail->category_id), 
-                                'sel_cat_id'=> $product_detail->category_id, 
-                                'sel_cat_name'=>$request->user()->store->categories->findOrFail($product_detail->category_id)->name,  
-                                'id'=>$id]);
-    }
 
     /**
      * Update the specified resource in storage.
@@ -83,12 +60,15 @@ class ProductController extends Controller
         $name = $request->input('name');
         $price = $request->input('price');
         $category_id = $request->input('category');
+        $stock = $request->input('stock');
+
         $request->user()->store->products()->where('id', '=', $id)->update([ 
             'name' => $name,
             'price' => $price,
-            'category_id'=> $category_id
+            'category_id'=> $category_id,
+            'stock' => $stock
         ]);
-        return redirect('products');
+        return redirect(route('products'));
     }
 
     /**
@@ -97,7 +77,7 @@ class ProductController extends Controller
     public function destroy(Request $request, string $id)
     {
         $request->user()->store->products()->where('id', '=', $id)->delete();
-        return redirect('products');
+        return redirect(route('products'));
     }
 
     public function view_cart() 

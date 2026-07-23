@@ -11,7 +11,8 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/js/cart.js'
+                'resources/js/cart.js',
+                'resources/js/product.js'
             ],
             refresh: true,
             fonts: [

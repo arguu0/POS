@@ -1,47 +1,53 @@
+import Chart from 'chart.js/auto';
 
-let data = JSON.parse(localStorage.getItem('cart') || '[]');
+function loadSalesChart() {
+    const canvas = document.getElementById('salesChart');
 
-function count_total() {
-    let total = 0
-    for (let i of data) {
-        let sum = i.quantity
-        total += sum
+    if (canvas) {
+        new Chart(canvas, {
+            type: 'line',
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            data: {
+                labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+                datasets: [{
+                    label: 'Sales',
+                    data: [100,500,1000,500,300,2000,1500],
+                    borderColor: '#4ade80',
+                    backgroundColor: 'rgba(74,222,128,.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                    beginAtZero: true,
+                    grid: {
+                            color: '#3f3f46'
+                        },
+                    ticks: {
+                        stepSize: 300
+                    }
+                }
+                }
+            }
+        });
     }
-    return total
 }
 
-document.getElementById('cart-counter').innerText = count_total()
+document.addEventListener('DOMContentLoaded', loadSalesChart);
 
-const buttons = document.querySelectorAll('#add_to_cart_btn');
-
-buttons.forEach(button => {
-    button.addEventListener('click', function () {
-        let values = {
-            id: this.dataset.id,
-            quantity: (JSON.parse(localStorage.getItem('cart'))?.find(product => product.id === this.dataset.id)?.quantity) ?? 1
-        };
-        
-        const exist = data.some(user => user.id == values.id) 
-
-        if (exist) {
-            data = data.map(user=> {        // using .map() to loop through the data[localStorage] then return the value [object] back 
-                if (user.id == values.id) {
-                    const new_quantity = values.quantity + 1;
-
-                    return {...user, quantity: new_quantity };
-                }
-                return user;
-            })
-            localStorage.setItem('cart', JSON.stringify(data))
-            
-        } else {
-            data.push(values);
-
-            localStorage.setItem('cart', JSON.stringify(data));
-        }
-        
-        document.getElementById('cart-counter').textContent = count_total()
-    })
-});
-
-
+document.addEventListener('livewire:navigated', loadSalesChart);

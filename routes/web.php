@@ -12,23 +12,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__.'/settings.php';
 
-Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products', [ProductController::class, 'get_product_page'])->name('products');
 
-Route::get('/products/create', [ProductController::class, 'create']);
+Route::post('/products/create', [ProductController::class, 'create_new_product'])->name('products.create');
 
-Route::post('/products/create_category', [ProductController::class, 'create_cat']);
+Route::put('/products/{id}/update', [ProductController::class, 'update'])->name('products.update');
 
-Route::post('/products/create', [ProductController::class, 'store']);
+Route::delete('/products/{id}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
 
-Route::get('/products/{id}/update', [ProductController::class, 'edit']);
+Route::get('/cart', [ProductController::class, 'view_cart'])->name('transaction');
 
-Route::put('/products/{id}/update', [ProductController::class, 'update']);
-
-Route::delete('/products/{id}/delete', [ProductController::class, 'destroy']);
-
-Route::get('/cart', [ProductController::class, 'view_cart']);
-
-Route::get('/get_products', [ProductController::class, 'return_product_data']);
+Route::get('/get_products', [ProductController::class, 'return_product_data'])->name('receipt');
 
 Route::post('/cart/transaction', [ProductController::class, 'create_transaction_history']);
 
