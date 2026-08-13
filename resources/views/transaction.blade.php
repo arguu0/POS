@@ -75,7 +75,7 @@
                 <div class="border-t border-[#2a2a2a] pt-4 print:border-zinc-300 space-y-3 text-xs sm:text-sm px-1 sm:px-0">
                     <div class="flex justify-between items-center text-base sm:text-lg font-bold">
                         <span class="text-white print:text-black">Total Amount</span>
-                        <span class="text-[#00e676] text-lg sm:text-xl print:text-black">{{ $transaction->Total_Amount }} Ks</span>
+                        <span class="text-[#00e676] text-lg sm:text-xl print:text-black">{{ $transaction->Total_Amount - $transaction->Discount }} Ks</span>
                     </div>
 
                     <div class="flex justify-between items-center text-zinc-400 print:text-zinc-700">
@@ -85,7 +85,7 @@
 
                     <div class="flex justify-between items-center text-zinc-400 print:text-zinc-700">
                         <span>Change Due</span>
-                        <span class="font-medium text-lg text-yellow-300 print:text-black">{{ $transaction->Total_Amount - $transaction->Discount }} Ks</span>
+                        <span class="font-medium text-lg text-yellow-300 print:text-black">{{ $transaction->Paid_Amount - $transaction->Total_Amount + $transaction->Discount }} Ks</span>
                     </div>
                 </div>
 

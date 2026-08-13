@@ -11,7 +11,7 @@ function count_total(stored_data) {
 function change_subtotal(data, stored_data) {
     let total = 0;
     data.map((item,i) => {
-        total += item.price * stored_data[i].quantity;
+        total += item.selling_price * stored_data[i].quantity;
     })
 
     document.getElementById('subtotal').innerText = total + "Ks";
@@ -43,7 +43,7 @@ window.addEventListener('livewire:navigated', async function () {
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#262626] rounded-lg border border-[#333333]">
                 <div>
                     <h3 class="font-semibold text-sm">${item.name}</h3>
-                    <span class="text-xs text-gray-400">${item.price} Ks / unit</span>
+                    <span class="text-xs text-gray-400">${item.selling_price} Ks / unit</span>
                 </div>
                 <div class="flex items-center justify-between sm:justify-end gap-4">
                     <div class="flex items-center gap-2 bg-[#1a1a1a] px-2 py-1 rounded-md border border-[#383838]">
@@ -51,7 +51,7 @@ window.addEventListener('livewire:navigated', async function () {
                         <span class="text-sm px-1 font-semibold" id="${item.id}">${stored_data[i].quantity}</span>
                         <button class="px-2 text-gray-400 hover:text-white" data-id="${item.id}" id='add-btn'>+</button>
                     </div>
-                    <span class="text-sm font-semibold sm:w-20 sm:text-right" id='subtotal-${item.id}'>${item.price * stored_data[i].quantity} Ks</span>
+                    <span class="text-sm font-semibold sm:w-20 sm:text-right" id='subtotal-${item.id}'>${item.selling_price * stored_data[i].quantity} Ks</span>
                     <button class="text-gray-500 hover:text-red-400 p-1" data-id='${item.id}' id='rm-from-cart'>✕</button>
                 </div>
             </div>`).join('');
@@ -62,7 +62,7 @@ window.addEventListener('livewire:navigated', async function () {
             button.addEventListener('click', function () {
                 let qty = stored_data.find(item=> item.id == this.dataset.id).quantity + 1;
                 const id = this.dataset.id;
-                const price = data.find(item=> item.id == id).price;
+                const price = data.find(item=> item.id == id).selling_price;
 
                 document.getElementById(id).innerText = qty;
                 document.getElementById(`subtotal-${id}`).innerText = `${price * qty} Ks`;
@@ -87,7 +87,7 @@ window.addEventListener('livewire:navigated', async function () {
             button.addEventListener('click', function () {
                 let qty = stored_data.find(item=> item.id == this.dataset.id).quantity - 1;
                 const id = this.dataset.id;
-                const price = data.find(item=> item.id == id).price;
+                const price = data.find(item=> item.id == id).selling_price;
 
                 document.getElementById(id).innerText = qty;
                 document.getElementById(`subtotal-${id}`).innerText = `${price * qty} Ks`;
@@ -136,7 +136,7 @@ window.addEventListener('livewire:navigated', async function () {
             document.getElementById('discount-value').innerText = discount + 'KS';
             document.getElementById('total').innerText = `${change_subtotal(data, stored_data) - discount} Ks`;
             
-            document.getElementById('changes').innerText = parseInt(document.getElementById('paid_amount').value) - parseInt(document.getElementById('total').textContent);
+            document.getElementById('changes').innerText = parseInt(document.getElementById('paid_amount').value) - parseInt(document.getElementById('total').textContent) + ' Ks';
         })
 
         const input = document.querySelector('#paid_amount');

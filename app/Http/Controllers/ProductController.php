@@ -54,10 +54,10 @@ class ProductController extends Controller
     public function create_new_product(Request $request)
     {
         $name = $request->input('name');
-        $price = $request->input('price');
+        $buying_price = $request->input('cost');
+        $selling_price = $request->input('price');
         $category_id = $request->input('category');
         $new_category = $request->input('new_category');
-        $stock = $request->input('stock');
 
         if ($new_category) {
             $new_cat = $request->user()->store->categories()->create([
@@ -65,16 +65,16 @@ class ProductController extends Controller
             ]);
             $request->user()->store->products()->create([
                 'name' => $name,
-                'price' => $price,
+                'buying_price' => $buying_price,
+                'selling_price' => $selling_price,
                 'category_id' => $new_cat->id,
-                'stock' => $stock
             ]);
         } else {
             $request->user()->store->products()->create([
                 'name' => $name,
-                'price' => $price,
+                'buying_price' => $buying_price,
+                'selling_price' => $selling_price,
                 'category_id' => $category_id,
-                'stock' => $stock
             ]);
         }
         return redirect()->route('products');
@@ -87,15 +87,15 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         $name = $request->input('name');
-        $price = $request->input('price');
+        $selling_price = $request->input('price');
+        $buying_price = $request->input('cost');
         $category_id = $request->input('category');
-        $stock = $request->input('stock');
 
         $request->user()->store->products()->where('id', '=', $id)->update([ 
             'name' => $name,
-            'price' => $price,
+            'selling_price' => $selling_price,
+            'buying_price' => $buying_price,
             'category_id'=> $category_id,
-            'stock' => $stock
         ]);
         return redirect()->route('products');
     }
@@ -145,12 +145,12 @@ class ProductController extends Controller
 
         foreach ($cart_list as $item) {
             $data = $request->user()->store->products()->find($item['id']);
-            $subtotal = $data->price * $item['quantity'];
+            $subtotal = $data->selling_price * $item['quantity'];
             $total += $subtotal;
 
             $item = $transaction->items()->create([
                 'product_name' => $data->name,
-                'product_price' => $data->price,
+                'product_price' => $data->selling_price,
                 'product_quantity' => $item['quantity'],
                 'subtotal' => $subtotal
             ]);

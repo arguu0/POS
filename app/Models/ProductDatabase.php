@@ -8,9 +8,9 @@ class ProductDatabase extends Model
 {
     protected $fillable = [
         'name',
-        'price',
-        'category_id',
-        'stock'
+        'selling_price',
+        'buying_price',
+        'category_id'
     ];
     public function store()
     {

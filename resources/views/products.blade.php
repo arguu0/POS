@@ -96,24 +96,16 @@
                                 </span>
                             </div>
 
-                            {{-- Column 2: Stock --}}
-                            <div class="text-sm text-neutral-500 lg:col-span-2">
-                                Stock:
-                                <span class="font-medium text-neutral-900 dark:text-white">
-                                    {{ $item->stock }}
-                                </span>
-                            </div>
-
                             {{-- Column 3: Price --}}
-                            <div class="text-sm text-neutral-500 lg:col-span-3">
+                            <div class="text-sm text-neutral-500 lg:col-span-4 lg:text-center">
                                 Price:
                                 <span class="font-medium text-neutral-900 dark:text-white">
-                                    {{ $item->price }} Ks
+                                    {{ $item->selling_price }} Ks
                                 </span>
                             </div>
 
                             {{-- Column 4: Buttons --}}
-                            <div class="flex items-center gap-2 pt-2 sm:pt-0 lg:col-span-3 lg:justify-end lg:pt-0">
+                            <div class="flex items-center gap-2 pt-2 sm:pt-0 lg:col-span-4 lg:justify-end lg:pt-0">
 
                                 {{-- EDIT BUTTON (Triggers this item's editModal) --}}
                                 <button 
@@ -124,13 +116,12 @@
                                 </button>
 
                                 {{-- DELETE FORM --}}
-                                <form action="{{ route('products.destroy', $item->id) }}" method="POST">
+                                <form action="{{ route('products.destroy', $item->id) }}" method="POST" class="flex-1 rounded-lg border border-red-200 px-3 py-2 text-center text-sm text-red-500 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950 lg:flex-none">
                                     @csrf
                                     @method('DELETE')
                                     <button 
                                         type="submit"
-                                        onclick="return confirm('Are you sure you want to delete this item?')"
-                                        class="flex-1 rounded-lg border border-red-200 px-3 py-2 text-center text-sm text-red-500 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950 lg:flex-none">
+                                        onclick="return confirm('Are you sure you want to delete this item?')">
                                         Delete
                                     </button>
                                 </form>
@@ -225,17 +216,17 @@
                                         </div>
                                     </div>
 
-                                    {{-- Stock & Price --}}
+                                    {{-- Prices --}}
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Stock Quantity</label>
-                                            <input type="number" name="stock" value="{{ $item->stock }}" min="0" required
+                                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Cost Price</label>
+                                            <input type="number" name="cost" value="{{ $item->buying_price }}" min="0" required
                                                 class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:focus:border-neutral-400">
                                         </div>
 
                                         <div>
-                                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Price (Ks)</label>
-                                            <input type="number" name="price" value="{{ $item->price }}" min="0" required
+                                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Selling Price (Ks)</label>
+                                            <input type="number" name="price" value="{{ $item->selling_price }}" min="0" required
                                                 class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:focus:border-neutral-400">
                                         </div>
                                     </div>
@@ -348,17 +339,17 @@
                         </div>
                     </div>
 
-                    {{-- Stock & Price (2 Columns) --}}
+                    {{-- Prices (2 Columns) --}}
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Stock Quantity</label>
-                            <input type="number" name="stock" min="0" required placeholder="20"
+                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Cost Price</label>
+                            <input type="number" name="cost" min="0" required placeholder="1500"
                                 class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:focus:border-neutral-400">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Price (Ks)</label>
-                            <input type="number" name="price" min="0" required placeholder="1600"
+                            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Selling Price (Ks)</label>
+                            <input type="number" name="price" min="0" required placeholder="2000"
                                 class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:focus:border-neutral-400">
                         </div>
                     </div>
