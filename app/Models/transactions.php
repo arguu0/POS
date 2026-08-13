@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class transactions extends Model
 {
     protected $fillable = [
-        'Total_Amount'
+        'Total_Amount',
+        'Paid_Amount',
+        'Discount'
     ];
 
     public function store() {

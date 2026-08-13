@@ -2,12 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
-use App\Models\ProductDatabase;
+use Illuminate\Http\Request;
 
 Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', [ProductController::class, 'view_dashboard'])->name('dashboard');
 });
 
 require __DIR__.'/settings.php';
@@ -20,10 +20,14 @@ Route::put('/products/{id}/update', [ProductController::class, 'update'])->name(
 
 Route::delete('/products/{id}/delete', [ProductController::class, 'destroy'])->name('products.destroy');
 
-Route::get('/cart', [ProductController::class, 'view_cart'])->name('transaction');
+Route::get('/checkout', [ProductController::class, 'view_checkout_page'])->name('checkout');
 
-Route::get('/get_products', [ProductController::class, 'return_product_data'])->name('receipt');
+Route::post('/post', [ProductController::class, 'get_localstorage_data']);
 
-Route::post('/cart/transaction', [ProductController::class, 'create_transaction_history']);
+Route::post('/make_receipt', [ProductController::class, 'make_receipt']);
 
-Route::get('/receipt/{id}', [ProductController::class, 'view_receipt'])->name('receipt.show');
+Route::get('/transactions', [ProductController::class, 'view_transactions_history'])->name('transaction');
+
+Route::get('/transaction/{id}', [ProductController::class, 'view_transaction']);
+
+

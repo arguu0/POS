@@ -1,107 +1,188 @@
-let stored_data = JSON.parse(localStorage.getItem('cart') || '[]');
 
-async function fetch_product_data() {
-
-    const response = await fetch('http://localhost:8000/get_products');
-    const data = await response.json();
-
-    return data;
-}
-const data = await fetch_product_data()
-
-const new_data = stored_data.map(user => 
-    data.find(product=> product.id == user.id)
-)
-
-function add_to_array() {
-    stored_data.map((user, i) => {
-        if (new_data[i]) {
-            new_data[i].quantity = user.quantity;
-        }
-    });
-}
-
-
-function calc_total() {
+function count_total(stored_data) {
     let total = 0
-    for (let i of new_data) {
-        let subtotal = i.quantity * i.price;
-        total += subtotal;
+    for (let i of stored_data) {
+        let sum = i.quantity
+        total += sum
     }
     return total
 }
 
-function change_val() {
-    document.getElementById('to_server').innerHTML = stored_data.map((user, i) => `
-    <input type="hidden" name="id-${i}" value="${user.id}">
-    <input type="hidden" name="qty-${i}" value="${user.quantity}">
-`).join('');
+function change_subtotal(data, stored_data) {
+    let total = 0;
+    data.map((item,i) => {
+        total += item.price * stored_data[i].quantity;
+    })
+
+    document.getElementById('subtotal').innerText = total + "Ks";
+
+    document.getElementById('total').innerText = total + 'KS';
+
+    return total;
 }
 
+window.addEventListener('livewire:navigated', async function () {
+    if (window.location.pathname == '/checkout') {
+        let stored_data = JSON.parse(localStorage.getItem('cart') || '[]');
+        let lS_data = stored_data.map(item => { return {id:item.id, quantity: item.quantity} });
 
-add_to_array()
+        const response = await fetch("http://127.0.0.1:8000/post", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', 
+            },
+            body: JSON.stringify({ lS_data }),
+        });
+        let data = await response.json();
 
-document.getElementById('total').textContent = calc_total();
+        change_subtotal(data, stored_data);
 
-document.getElementById('show_all').innerHTML = new_data.map(user => `<p> <span>${user.name}</span>, price: <span>${user.price}</span> 
-    <button id="minus-btn" data-id="${user.id}">-</button> <span id="count-${user.id}"> ${user.quantity} </span>
-    <button id="plus-btn" data-id="${user.id}">+</button> </p> `).join('');
+        const cart_list = document.getElementById(('cart_list'));
+        if (!cart_list) return;
+        cart_list.innerHTML = data.map((item,i) => `
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[#262626] rounded-lg border border-[#333333]">
+                <div>
+                    <h3 class="font-semibold text-sm">${item.name}</h3>
+                    <span class="text-xs text-gray-400">${item.price} Ks / unit</span>
+                </div>
+                <div class="flex items-center justify-between sm:justify-end gap-4">
+                    <div class="flex items-center gap-2 bg-[#1a1a1a] px-2 py-1 rounded-md border border-[#383838]">
+                        <button class="px-2 text-gray-400 hover:text-white" data-id="${item.id}" id='sub-btn'>-</button>
+                        <span class="text-sm px-1 font-semibold" id="${item.id}">${stored_data[i].quantity}</span>
+                        <button class="px-2 text-gray-400 hover:text-white" data-id="${item.id}" id='add-btn'>+</button>
+                    </div>
+                    <span class="text-sm font-semibold sm:w-20 sm:text-right" id='subtotal-${item.id}'>${item.price * stored_data[i].quantity} Ks</span>
+                    <button class="text-gray-500 hover:text-red-400 p-1" data-id='${item.id}' id='rm-from-cart'>✕</button>
+                </div>
+            </div>`).join('');
 
-change_val();
+        const addition_btns = document.querySelectorAll('#add-btn')
+        if (!addition_btns) return;
+        addition_btns.forEach(button => {
+            button.addEventListener('click', function () {
+                let qty = stored_data.find(item=> item.id == this.dataset.id).quantity + 1;
+                const id = this.dataset.id;
+                const price = data.find(item=> item.id == id).price;
 
-document.getElementById('length').innerHTML = `<input type='hidden' name='length' value='${stored_data.length}'></input>`;
+                document.getElementById(id).innerText = qty;
+                document.getElementById(`subtotal-${id}`).innerText = `${price * qty} Ks`;
+                stored_data = stored_data.map(item=> {
+                    if (item.id == this.dataset.id) {
+                        return ({...item, quantity: qty  }) 
+                    }
+                    return item
+                })
+                localStorage.setItem('cart', JSON.stringify(stored_data));
+                change_subtotal(data, stored_data);
+                
+                window.dispatchEvent(new CustomEvent('cart-updated', { 
+                    detail: { count: count_total(stored_data) } 
+                }));
+            })
+        })
 
-const plus_buttons = document.querySelectorAll('#plus-btn')
+        const subtract_btns = document.querySelectorAll('#sub-btn')
+        if (!subtract_btns) return;
+        subtract_btns.forEach(button => {
+            button.addEventListener('click', function () {
+                let qty = stored_data.find(item=> item.id == this.dataset.id).quantity - 1;
+                const id = this.dataset.id;
+                const price = data.find(item=> item.id == id).price;
 
-plus_buttons.forEach(button => {
-    button.addEventListener('click', function () {
-        
-        const item = stored_data.find(user=> user.id == this.dataset.id);
+                document.getElementById(id).innerText = qty;
+                document.getElementById(`subtotal-${id}`).innerText = `${price * qty} Ks`;
+                if (qty <= 0) {
+                    button.disabled = true;
+                    stored_data = stored_data.filter(item=> item.id !== this.dataset.id)
+                    location.reload();
+                    if (stored_data.length == 0) return localStorage.removeItem('cart');
+                } else {
+                    stored_data = stored_data.map(item=> {
+                        if (item.id == this.dataset.id) {
+                            return ({...item, quantity: qty  }) 
+                        }
+                        return item
+                    })
+                }
+                localStorage.setItem('cart', JSON.stringify(stored_data))
+                change_subtotal(data, stored_data);
 
-        const updated_quantity = item.quantity + 1;
+                window.dispatchEvent(new CustomEvent('cart-updated', { 
+                    detail: { count: count_total(stored_data) } 
+                }));
+            })
+        })
 
-        item.quantity = updated_quantity;
-        
-        document.getElementById(`count-${item.id}`).textContent = updated_quantity
+        const clear_item = document.querySelectorAll('#rm-from-cart');
+        clear_item.forEach(button => {
+            button.addEventListener('click', function() {
+                stored_data = stored_data.filter(item => item.id !== this.dataset.id);
 
-        localStorage.setItem('cart', JSON.stringify(stored_data));
-        add_to_array();
-        document.getElementById('total').textContent = calc_total();
+                localStorage.setItem('cart', JSON.stringify(stored_data))
+                location.reload();
+                if (stored_data.length == 0) return localStorage.removeItem('cart');
+            })
+        })
 
-        change_val();
-    })
-})
+        document.getElementById('clear_all_btn').addEventListener('click', function () {
+            localStorage.removeItem('cart');
+            location.reload();
+            if (stored_data.length == 0) return localStorage.removeItem('cart');
+        })
 
-const minus_buttons = document.querySelectorAll('#minus-btn')
-
-minus_buttons.forEach(button => {
-    button.addEventListener('click', function () {
-
-        const item = stored_data.find(user=> user.id == this.dataset.id);    // find the product using .find(), return object
-
-        const updated_quantity = item.quantity - 1;
-
-        document.getElementById(`count-${item.id}`).textContent = updated_quantity    // display the number in frontend
-
-        if (updated_quantity <= 0) {
-            button.disabled = true;
-            stored_data = stored_data.filter(user=> user.id != item.id)       // filter() to show everything except the not equal one
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
+        const input_discount = document.querySelector('#discount');
+        input_discount.addEventListener('input', (event) => {
+            let discount = event.target.value;
+            document.getElementById('discount-value').innerText = discount + 'KS';
+            document.getElementById('total').innerText = `${change_subtotal(data, stored_data) - discount} Ks`;
             
-        } else {
-            item.quantity = updated_quantity;      // item [object] change the quantity
-        }
+            document.getElementById('changes').innerText = parseInt(document.getElementById('paid_amount').value) - parseInt(document.getElementById('total').textContent);
+        })
 
-        localStorage.setItem('cart', JSON.stringify(stored_data));
-        add_to_array();
-        document.getElementById('total').textContent = calc_total();
-        change_val();
-       
-    })
+        const input = document.querySelector('#paid_amount');
+        input.addEventListener('input', (event) => {
+            const total = parseInt(document.getElementById('total').textContent);
+            let paid_amount = event.target.value;
+            document.getElementById('changes').innerText = `${paid_amount - total} Ks`;
+        })
+
+        document.getElementById('pay_print').addEventListener('click', async function () {
+            
+            if (!JSON.parse(localStorage.getItem('cart'))) {
+                alert("cart is empty");
+                return;
+            }
+            
+            const paid_amount = document.getElementById('paid_amount').value;
+            const discount = document.getElementById('discount').value;
+
+            if (!paid_amount) alert("Please enter paid amount!");
+
+            else {
+                let choice = confirm('Click "OK" to Confirm!');
+                if (!choice) return;
+
+                let get_ls = stored_data.map(item => { return { id: item.id, quantity: item.quantity } });
+                let final_ls = {...get_ls, "paid": paid_amount, "discount": discount};
+                
+                const response = await fetch("http://127.0.0.1:8000/make_receipt", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ final_ls }),
+                });
+                let data = await response.json();
+
+                window.location.pathname = `/transaction/${data}`;
+                localStorage.removeItem('cart');
+            }
+        })
+    }
 })
 
-document.getElementById('clear_ls').addEventListener('click', async function clear() {
-    localStorage.removeItem('cart');
-})
+
+
+    
+
+

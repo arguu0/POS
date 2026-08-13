@@ -11,5 +11,5 @@
 
 @fonts
 
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+@vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/add_to_cart.js', 'resources/js/cart.js'])
 @fluxAppearance

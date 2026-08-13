@@ -20,13 +20,29 @@
                         {{ __('Products') }}
                     </flux:sidebar.item>
 
-                    <flux:sidebar.item icon="shopping-cart" :href="route('receipt')" :current="request()->routeIs('receipt')" wire:navigate>
+                    <flux:sidebar.item icon="shopping-cart" :href="route('checkout')" :current="request()->routeIs('checkout')" wire:navigate
+                        x-data="{ total: 0 }"
+                        x-init="
+                            const cart_data= JSON.parse(localStorage.getItem('cart') || '[]');
+                            for (let i of cart_data) {
+                                let sum = i.quantity
+                                total += sum
+                            }
+                            window.addEventListener('cart-updated', count => total = count.detail.count)"
+                            @cart-updated.window="total = Number($event.detail.count)">
                         {{ __('Checkout') }}
+
+                        <x-slot name="badge">
+                            <flux:badge class="!bg-transparent !p-0 !shadow-none" color="white" x-text="total">0</flux:badge>
+                        </x-slot>
+
                     </flux:sidebar.item>
 
+           
                     <flux:sidebar.item icon="chart-bar" :href="route('transaction')" :current="request()->routeIs('transaction')" wire:navigate>
                         {{ __('Transactions') }}
                     </flux:sidebar.item>
+                    
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

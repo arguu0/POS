@@ -2,12 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductDatabase;
-use App\Models\transactions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use PhpOption\None;
 
 class ProductController extends Controller
 {
+
+    public function view_dashboard(Request $request)
+    {
+        $transaction = $request->user()->store->transactions()->whereDate('created_at', now())->get();  //gets today's transaction
+        $today_total = $transaction->sum('Total_Amount');
+
+        $records = $request->user()->store->transactions()->whereBetween('created_at', [   //gets transaction from first day of week
+            Carbon::now()->startOfWeek(), 
+            Carbon::now()
+        ])->get();
+        $weekly_total = $records->sum('Total_Amount');
+
+        $transaction_total = $request->user()->store->transactions()->count();       
+
+
+        $graph_data = [];
+        for ($i=0; $i < 7; $i++) {
+            $transaction = $request->user()->store->transactions()->whereDate('created_at', now()->startOfWeek()->addDays($i))->get();
+            $graph_data[] = $transaction->sum('Total_Amount');
+        }
+
+        return view('dashboard', [
+            'today_sale'=> $today_total,
+            'weekly_sale'=> $weekly_total,
+            'transaction_total'=> $transaction_total,
+            'graph_data'=> $graph_data
+        ]);
+    }
+
     /** 
      * Display Product Page
      */
@@ -48,7 +77,7 @@ class ProductController extends Controller
                 'stock' => $stock
             ]);
         }
-        return redirect(route('products'));
+        return redirect()->route('products');
     }
 
 
@@ -68,7 +97,7 @@ class ProductController extends Controller
             'category_id'=> $category_id,
             'stock' => $stock
         ]);
-        return redirect(route('products'));
+        return redirect()->route('products');
     }
 
     /**
@@ -76,61 +105,76 @@ class ProductController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
+        $cat_id = $request->user()->store->products->find($id)->category_id;
+        $cat = $request->user()->store->categories()->find($cat_id);
         $request->user()->store->products()->where('id', '=', $id)->delete();
-        return redirect(route('products'));
+        if ($cat->products()->count() <= 0) {
+            $cat->delete();
+        }
+        return redirect()->route('products');
     }
 
-    public function view_cart() 
+    public function view_checkout_page() 
     {
-        return view('cart');
+        return view('checkout');
     }
 
-    public function return_product_data (Request $request)
+    public function get_localstorage_data(Request $request)
     {
-        $products = $request->user()->store->products;
-        return $products;
-    }
-
-    public function create_transaction_history(Request $request)
-    {
-        $length = $request->input('length');
-        $total = 0;
-        $items = [];
-        for ($i=0; $i < $length ; $i++) { 
-            $id = $request->input('id-' . $i);
-            $qty = $request->input('qty-' . $i);
-            $product = $request->user()->store->products()->find($id);
-            $subtotal = $product->price * $qty;
-            $total += $subtotal;
-
-            $items[] = [
-                'name' => $product->name,
-                'price' => $product->price,
-                'quantity' => $qty,
-                'subtotal' => $subtotal
-            ];
+        $cart_id_list = $request->input('lS_data');
+        $cart_data = [];
+        foreach ($cart_id_list as $item) {
+            $data = $request->user()->store->products()->find($item['id']);
+            $cart_data[] = $data;
         };
+        return $cart_data;
+    }
 
+    public function make_receipt(Request $request)
+    {
+        $cart_list = $request->input('final_ls');
+        $discount = array_pop($cart_list);
+        $paid_amount = array_pop($cart_list);
+
+        $total = 0;
         $transaction = $request->user()->store->transactions()->create([
-            'Total_Amount'=> $total
+            'Total_Amount' => $total,
+            'Discount' => $discount,
+            'Paid_Amount' => $paid_amount
         ]);
 
-        foreach ($items as $item) {
-            $transaction->items()->create([
-                'product_name' => $item['name'],
-                'product_price' => $item['price'],
+        foreach ($cart_list as $item) {
+            $data = $request->user()->store->products()->find($item['id']);
+            $subtotal = $data->price * $item['quantity'];
+            $total += $subtotal;
+
+            $item = $transaction->items()->create([
+                'product_name' => $data->name,
+                'product_price' => $data->price,
                 'product_quantity' => $item['quantity'],
-                'subtotal' => $item['subtotal']
+                'subtotal' => $subtotal
             ]);
-        }
-        return redirect()->route('receipt.show', $transaction->id);
+        };
+
+        $transaction->Total_Amount = $total;
+        $transaction->save();
+        return $transaction->id;
     }
 
-    public function view_receipt(Request $request, string $id)
+    public function view_transactions_history(Request $request)
+    {
+        $transaction_history = $request->user()->store->transactions;
+        return view('transactions', [
+            'transactions' => $transaction_history
+        ]);
+    }
+
+    public function view_transaction(Request $request, String $id)
     {
         $transaction = $request->user()->store->transactions->find($id);
-        $item = $transaction->items;
-        return view('receipt', [ 'transaction' => $item, 'Total' => $transaction->Total_Amount ]);
+        $items = $transaction->items;
+        
+        return view('transaction', ['transaction'=>$transaction, 'items'=>$items]);
+        
     }
-
 }

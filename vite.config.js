@@ -12,7 +12,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/cart.js',
-                'resources/js/product.js'
+                'resources/js/add_to_cart.js'
             ],
             refresh: true,
             fonts: [

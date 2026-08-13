@@ -59,6 +59,7 @@
                 </div>
 
                 <select
+                autocomplete="off"
                     class="rounded-xl border-neutral-200 bg-white px-4 py-3 text-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white">
 
                     <option @selected(true)>
@@ -135,7 +136,7 @@
                                 </form>
 
                                 {{-- CART BUTTON --}}
-                                <button type="button" class="flex-1 rounded-lg border border-green-600 px-3 py-2 text-center text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-950 lg:flex-none">
+                                <button type="button" id='add_to_cart_btn' data-id={{ $item->id }} class="flex-1 rounded-lg border border-green-600 px-3 py-2 text-center text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-950 lg:flex-none">
                                     Cart
                                 </button>
 
@@ -186,15 +187,24 @@
                                             class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:focus:border-neutral-400">
                                     </div>
 
-                                    {{-- Category --}}
+                                    {{-- Dynamic Category Input --}}
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
                                             <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400">Category</label>
+                                            
+                                            <button 
+                                                type="button" 
+                                                @click="isNewCategory = !isNewCategory" 
+                                                class="text-xs text-green-600 hover:underline dark:text-green-400 font-medium">
+                                                <span x-show="!isNewCategory">+ New Category</span>
+                                                <span x-show="isNewCategory">Select Existing</span>
+                                            </button>
                                         </div>
 
-                                        {{-- Category Dropdown --}}
-                                        <div>
-                                            <select
+                                        {{-- Existing Category Dropdown --}}
+                                        <div x-show="!isNewCategory">
+                                            <select 
+                                                ::required="!isNewCategory"
                                                 name="category"
                                                 class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:bg-neutral-900 dark:focus:border-neutral-400">
                                                 <option value="">Select Category</option>
@@ -204,6 +214,15 @@
                                             </select>
                                         </div>
 
+                                        {{-- New Category Input --}}
+                                        <div x-show="isNewCategory" x-cloak>
+                                            <input 
+                                                type="text" 
+                                                ::required="isNewCategory"
+                                                name="new_category" 
+                                                placeholder="e.g. Fast Foods"
+                                                class="w-full rounded-lg border border-neutral-200 bg-transparent px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:text-white dark:focus:border-neutral-400">
+                                        </div>
                                     </div>
 
                                     {{-- Stock & Price --}}

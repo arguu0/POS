@@ -3,6 +3,12 @@ import Chart from 'chart.js/auto';
 function loadSalesChart() {
     const canvas = document.getElementById('salesChart');
 
+    let list = [];
+    const values = document.querySelectorAll('.values');
+    values.forEach(value => {
+        list.push(parseInt(value.dataset.val));
+    })
+
     if (canvas) {
         new Chart(canvas, {
             type: 'line',
@@ -12,7 +18,7 @@ function loadSalesChart() {
                 labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
                 datasets: [{
                     label: 'Sales',
-                    data: [100,500,1000,500,300,2000,1500],
+                    data: list,
                     borderColor: '#4ade80',
                     backgroundColor: 'rgba(74,222,128,.2)',
                     fill: true,
@@ -39,7 +45,7 @@ function loadSalesChart() {
                             color: '#3f3f46'
                         },
                     ticks: {
-                        stepSize: 300
+                        stepSize: 10000
                     }
                 }
                 }
