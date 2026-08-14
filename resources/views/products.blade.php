@@ -32,7 +32,7 @@
                         Total Products
                     </p>
                     <h2 class="mt-2 text-2xl font-semibold dark:text-white">
-                        {{ count($products) }}
+                        {{ $total_product }}
                     </h2>
                 </div>
 
@@ -53,6 +53,8 @@
                 <div class="flex-1">
                     <input
                         type="text"
+                        id="search_bar"
+                        value="{{ old('search', request('search')) }}"
                         placeholder="Search product..."
                         class="w-full rounded-xl border-neutral-200 bg-white px-4 py-3 text-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white"
                     >
@@ -60,13 +62,15 @@
 
                 <select
                 autocomplete="off"
-                    class="rounded-xl border-neutral-200 bg-white px-4 py-3 text-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white">
+                    class="rounded-xl border-neutral-200 bg-white px-4 py-3 text-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-white"
+                    onchange="if (this.value) window.location.href = this.value;">
 
-                    <option @selected(true)>
+                    <option @selected(true) value="/products">
                         All Categories
                     </option>
+                    
                     @foreach ($category as $cat)
-                        <option value="{{ $cat->name }}">
+                        <option @selected(request('category') == $cat->name) value="/products?category={{ $cat->name }}">
                             {{ $cat->name }}
                         </option>
                     @endforeach
@@ -254,6 +258,11 @@
                     
                 @endforeach
 
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="px-4 py-3 flex items-center justify-end">
+                {{ $products->withQueryString()->links('pagination::tailwind') }}
             </div>
 
         </div>

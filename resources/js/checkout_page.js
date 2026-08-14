@@ -26,7 +26,7 @@ window.addEventListener('livewire:navigated', async function () {
         let stored_data = JSON.parse(localStorage.getItem('cart') || '[]');
         let lS_data = stored_data.map(item => { return {id:item.id, quantity: item.quantity} });
 
-        const response = await fetch("http://localhost:8000/post", {
+        const response = await fetch("/post", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', 
@@ -165,7 +165,7 @@ window.addEventListener('livewire:navigated', async function () {
                 let get_ls = stored_data.map(item => { return { id: item.id, quantity: item.quantity } });
                 let final_ls = {...get_ls, "paid": paid_amount, "discount": discount};
                 
-                const response = await fetch("http://localhost:8000/make_receipt", {
+                const response = await fetch("/make_receipt", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

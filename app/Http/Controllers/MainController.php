@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use PhpOption\None;
 
-class ProductController extends Controller
+
+class MainController extends Controller
 {
 
     public function view_dashboard(Request $request)
@@ -44,9 +44,24 @@ class ProductController extends Controller
      */
     public function get_product_page(Request $request)
     {
-        $products = $request->user()->store->products;
+        $total_product = $request->user()->store->products->count();
         $categories = $request->user()->store->categories;
-        return view('products', [ 'products' => $products, 'category'=> $categories ]); 
+
+       
+        if ($request->filled('category')) {
+            $cat_name = $request->query('category');
+            $filtered_cat = $request->user()->store->categories->where('name', $cat_name)->first();
+            $products = $filtered_cat->products()->latest()->paginate(10);
+        }
+        elseif ($request->filled('search')) {
+            $search_query = $request->query('search');
+            $products = $request->user()->store->products()->where("name", "LIKE", '%' . $search_query . '%')->paginate(10);
+        }
+        else {
+            $products = $request->user()->store->products()->latest()->paginate(10);
+        }
+        
+        return view('products', [ 'products' => $products, 'category'=> $categories, 'total_product'=>$total_product ]); 
     }
 
 
@@ -177,7 +192,15 @@ class ProductController extends Controller
 
     public function view_transactions_history(Request $request)
     {
-        $transaction_history = $request->user()->store->transactions;
+        if ($request->filled(['start_date', 'end_date'])) {
+            $start_date = Carbon::parse($request->query('start_date'))->startOfDay(); 
+            $end_date = Carbon::parse($request->query('end_date'))->endOfDay();
+            $transaction_history = $request->user()->store->transactions()->whereBetween('created_at', [$start_date, $end_date])->latest()->paginate(11);
+        }
+        else {
+            $transaction_history = $request->user()->store->transactions()->latest()->paginate(11);
+        }
+        
         return view('transactions', [
             'transactions' => $transaction_history
         ]);

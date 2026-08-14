@@ -57,4 +57,17 @@ document.addEventListener('livewire:navigated', () => {
     })
 })
 
+let timer;
+const search_input = document.querySelector('#search_bar');
+search_input.addEventListener('input', function (event) {
+   
+    let search_value = event.target.value;
+    if (search_value) clearTimeout(timer);
+    else window.location.href = '/products';
+   
+    timer = setTimeout(() => {
+        window.location.href = `/products?search=${search_value}`;
+    }, 800);
+})
+
 

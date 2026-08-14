@@ -39,7 +39,7 @@
                     </flux:sidebar.item>
 
            
-                    <flux:sidebar.item icon="chart-bar" :href="route('transaction')" :current="request()->routeIs('transaction')" wire:navigate>
+                    <flux:sidebar.item icon="chart-bar" :href="route('transactions')" :current="request()->routeIs('transaction')" wire:navigate>
                         {{ __('Transactions') }}
                     </flux:sidebar.item>
                     
