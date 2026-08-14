@@ -28,7 +28,7 @@
             </div>
             <div class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
                 <p class="text-xs font-medium uppercase tracking-widest text-neutral-400">Today's Profit</p>
-                <p class="mt-2 text-xl font-bold text-neutral-900 dark:text-white">-</p>
+                <p class="mt-2 text-xl font-bold text-neutral-900 dark:text-white">{{ $today_profit }} Ks</p>
             </div>
             <div class="rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
                 <p class="text-xs font-medium uppercase tracking-widest text-neutral-400">Transactions</p>

@@ -9,7 +9,8 @@ class transactions extends Model
     protected $fillable = [
         'Total_Amount',
         'Paid_Amount',
-        'Discount'
+        'Discount',
+        'Total_Profit'
     ];
 
     public function store() {

@@ -10,7 +10,8 @@ class ProductDatabase extends Model
         'name',
         'selling_price',
         'buying_price',
-        'category_id'
+        'category_id',
+        'profit',
     ];
     public function store()
     {

@@ -13,6 +13,7 @@ class ProductController extends Controller
     {
         $transaction = $request->user()->store->transactions()->whereDate('created_at', now())->get();  //gets today's transaction
         $today_total = $transaction->sum('Total_Amount');
+        $today_profit = $transaction->sum('Total_Profit');
 
         $records = $request->user()->store->transactions()->whereBetween('created_at', [   //gets transaction from first day of week
             Carbon::now()->startOfWeek(), 
@@ -33,7 +34,8 @@ class ProductController extends Controller
             'today_sale'=> $today_total,
             'weekly_sale'=> $weekly_total,
             'transaction_total'=> $transaction_total,
-            'graph_data'=> $graph_data
+            'graph_data'=> $graph_data,
+            'today_profit' => $today_profit
         ]);
     }
 
@@ -58,6 +60,7 @@ class ProductController extends Controller
         $selling_price = $request->input('price');
         $category_id = $request->input('category');
         $new_category = $request->input('new_category');
+        $profit = $selling_price - $buying_price;
 
         if ($new_category) {
             $new_cat = $request->user()->store->categories()->create([
@@ -68,6 +71,7 @@ class ProductController extends Controller
                 'buying_price' => $buying_price,
                 'selling_price' => $selling_price,
                 'category_id' => $new_cat->id,
+                'profit' => $profit
             ]);
         } else {
             $request->user()->store->products()->create([
@@ -75,6 +79,7 @@ class ProductController extends Controller
                 'buying_price' => $buying_price,
                 'selling_price' => $selling_price,
                 'category_id' => $category_id,
+                'profit' => $profit
             ]);
         }
         return redirect()->route('products');
@@ -90,12 +95,14 @@ class ProductController extends Controller
         $selling_price = $request->input('price');
         $buying_price = $request->input('cost');
         $category_id = $request->input('category');
+        $profit = $selling_price - $buying_price;
 
         $request->user()->store->products()->where('id', '=', $id)->update([ 
             'name' => $name,
             'selling_price' => $selling_price,
             'buying_price' => $buying_price,
             'category_id'=> $category_id,
+            'profit' => $profit
         ]);
         return redirect()->route('products');
     }
@@ -124,7 +131,7 @@ class ProductController extends Controller
         $cart_id_list = $request->input('lS_data');
         $cart_data = [];
         foreach ($cart_id_list as $item) {
-            $data = $request->user()->store->products()->find($item['id']);
+            $data = $request->user()->store->products()->select(['id', 'name', 'selling_price'])->find($item['id']);
             $cart_data[] = $data;
         };
         return $cart_data;
@@ -137,14 +144,19 @@ class ProductController extends Controller
         $paid_amount = array_pop($cart_list);
 
         $total = 0;
+        $total_profit = 0;
         $transaction = $request->user()->store->transactions()->create([
             'Total_Amount' => $total,
             'Discount' => $discount,
-            'Paid_Amount' => $paid_amount
+            'Paid_Amount' => $paid_amount,
+            'Total_Profit' => $total_profit
         ]);
 
         foreach ($cart_list as $item) {
             $data = $request->user()->store->products()->find($item['id']);
+            $sub_profit = $data->profit * $item['quantity'];
+            $total_profit += $sub_profit;
+
             $subtotal = $data->selling_price * $item['quantity'];
             $total += $subtotal;
 
@@ -157,7 +169,9 @@ class ProductController extends Controller
         };
 
         $transaction->Total_Amount = $total;
+        $transaction->Total_Profit = $total_profit;
         $transaction->save();
+
         return $transaction->id;
     }
 
