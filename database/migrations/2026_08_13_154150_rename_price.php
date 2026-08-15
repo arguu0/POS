@@ -22,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::table('product_databases', function (Blueprint $table) {
+            $table->dropColumn('buying_price');
+            $table->renameColumn('selling_price', 'price');
+        });
     }
 };

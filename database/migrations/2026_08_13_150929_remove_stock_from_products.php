@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('product_databases', function (Blueprint $table) {
-            
+            $table->integer('stock')->default(0);
         });
     }
 };
