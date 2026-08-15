@@ -8,7 +8,7 @@ function count_total() {
     return total
 }
 
-document.addEventListener('livewire:navigated', () => {
+document.addEventListener('DOMContentLoaded', () => {
 
     const buttons = document.querySelectorAll('#add_to_cart_btn');
 
