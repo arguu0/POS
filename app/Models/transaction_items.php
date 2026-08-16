@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class transaction_items extends Model
 {
@@ -13,11 +14,19 @@ class transaction_items extends Model
         'subtotal'
     ];
     
-    public function transactions() {
+    /**
+     * @return BelongsTo<transactions, $this>
+     */
+    public function transactions(): BelongsTo
+    {
         return $this->belongsTo(transactions::class);
     }
 
-    public function products() {
+    /**
+     * @return BelongsTo<ProductDatabase, $this>
+     */
+    public function products(): BelongsTo
+    {
         return $this->belongsTo(ProductDatabase::class);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductDatabase extends Model
 {
@@ -13,17 +15,28 @@ class ProductDatabase extends Model
         'category_id',
         'profit',
     ];
-    public function store()
+
+    /**
+     * @return BelongsTo<Store, $this>
+     */
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class, 'store_id');
     }
 
-    public function categories()
+    /**
+     * @return BelongsTo<Categories, $this>
+     */
+    public function categories(): BelongsTo
     {
         return $this->belongsTo(Categories::class, 'category_id');
     }
 
-    public function items() {
+    /**
+     * @return HasMany<transaction_items, $this>
+     */
+    public function items(): HasMany
+    {
         return $this->hasMany(transaction_items::class);
     }
 }

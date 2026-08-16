@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\View\View;
 
 
 class MainController extends Controller
 {
 
-    public function view_dashboard(Request $request)
+    public function view_dashboard(Request $request): View
     {
         $transaction = $request->user()->store->transactions()->whereDate('created_at', now())->get();  //gets today's transaction
         $today_total = $transaction->sum('Total_Amount');
@@ -42,7 +45,7 @@ class MainController extends Controller
     /** 
      * Display Product Page
      */
-    public function get_product_page(Request $request)
+    public function get_product_page(Request $request): View
     {
         $total_product = $request->user()->store->products->count();
         $categories = $request->user()->store->categories;
@@ -68,7 +71,7 @@ class MainController extends Controller
     /**
      * Create New Category / If Exist, Create New Product
      */
-    public function create_new_product(Request $request)
+    public function create_new_product(Request $request): RedirectResponse
     {
         $name = $request->input('name');
         $buying_price = $request->input('cost');
@@ -104,7 +107,7 @@ class MainController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): RedirectResponse
     {
         $name = $request->input('name');
         $selling_price = $request->input('price');
@@ -125,7 +128,7 @@ class MainController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, string $id)
+    public function destroy(Request $request, string $id): RedirectResponse
     {
         $cat_id = $request->user()->store->products->find($id)->category_id;
         $cat = $request->user()->store->categories()->find($cat_id);
@@ -136,12 +139,12 @@ class MainController extends Controller
         return redirect()->route('products');
     }
 
-    public function view_checkout_page() 
+    public function view_checkout_page(): View
     {
         return view('checkout');
     }
 
-    public function get_localstorage_data(Request $request)
+    public function get_localstorage_data(Request $request): JsonResponse
     {
         $cart_id_list = $request->input('lS_data');
         $cart_data = [];
@@ -149,10 +152,10 @@ class MainController extends Controller
             $data = $request->user()->store->products()->select(['id', 'name', 'selling_price'])->find($item['id']);
             $cart_data[] = $data;
         };
-        return $cart_data;
+        return response()->json($cart_data);
     }
 
-    public function make_receipt(Request $request)
+    public function make_receipt(Request $request): int
     {
         $cart_list = $request->input('final_ls');
         $discount = array_pop($cart_list);
@@ -168,7 +171,7 @@ class MainController extends Controller
         ]);
 
         foreach ($cart_list as $item) {
-            $data = $request->user()->store->products()->find($item['id']);
+            $data = $request->user()->store->products()->find($item['id'])->first();
             $sub_profit = $data->profit * $item['quantity'];
             $total_profit += $sub_profit;
 
@@ -190,7 +193,7 @@ class MainController extends Controller
         return $transaction->id;
     }
 
-    public function view_transactions_history(Request $request)
+    public function view_transactions_history(Request $request): View
     {
         if ($request->filled(['start_date', 'end_date'])) {
             $start_date = Carbon::parse($request->query('start_date'))->startOfDay(); 
@@ -206,7 +209,7 @@ class MainController extends Controller
         ]);
     }
 
-    public function view_transaction(Request $request, String $id)
+    public function view_transaction(Request $request, string $id): View
     {
         $transaction = $request->user()->store->transactions->find($id);
         $items = $transaction->items;
