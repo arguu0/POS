@@ -58,7 +58,7 @@ class MainController extends Controller
         }
         elseif ($request->filled('search')) {
             $search_query = $request->query('search');
-            $products = $request->user()->store->products()->where("name", "ILIKE", '%' . $search_query . '%')->paginate(10);
+            $products = $request->user()->store->products()->whereLike("name", "%{$search_query}%")->paginate(10);
         }
         else {
             $products = $request->user()->store->products()->latest()->paginate(10);
