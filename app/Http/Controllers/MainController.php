@@ -171,8 +171,12 @@ class MainController extends Controller
         ]);
 
         foreach ($cart_list as $item) {
-            $data = $request->user()->store->products()->find($item['id'])->first();
-            $sub_profit = $data->profit * $item['quantity'];
+            $data = $request->user()->store->products()->find($item['id']);
+            /** @var \App\Models\ProductDatabase|null $data */
+            if ($data) {
+                $sub_profit = $data->profit * $item['quantity'];
+            
+            
             $total_profit += $sub_profit;
 
             $subtotal = $data->selling_price * $item['quantity'];
@@ -184,12 +188,13 @@ class MainController extends Controller
                 'product_quantity' => $item['quantity'],
                 'subtotal' => $subtotal
             ]);
+            }
         };
 
         $transaction->Total_Amount = $total;
         $transaction->Total_Profit = $total_profit;
         $transaction->save();
-
+    
         return $transaction->id;
     }
 
