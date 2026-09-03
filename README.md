@@ -1,4 +1,4 @@
-# [ONGOING] Mini Point of Sale System 
+# Mini Point of Sale System 
 
 A mini **Point of Sale (POS) system** built with **Laravel** for managing products, sales, and transaction records.
 
